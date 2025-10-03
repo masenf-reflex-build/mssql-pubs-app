@@ -41,7 +41,7 @@ class AuthorDetailState(rx.State):
             self.author = None
             self.books = []
         try:
-            author_id = self.author_id_from_route
+            author_id = await self.get_value(self.author_id_from_route)
             if not author_id:
                 async with self:
                     self.is_loading = False
@@ -98,7 +98,7 @@ class AuthorDetailState(rx.State):
     @rx.event(background=True)
     async def add_book(self, form_data: dict):
         try:
-            author_id = self.author_id_from_route
+            author_id = await self.get_value(self.author_id_from_route)
             if not author_id:
                 return
             title_id = f"BU{random.randint(1000, 9999)}"
@@ -124,7 +124,7 @@ class AuthorDetailState(rx.State):
         except Exception as e:
             logging.exception(f"Failed to add book: {e}")
         async with self:
-            return AuthorDetailState.get_author_details
+            yield AuthorDetailState.get_author_details
 
     @rx.event(background=True)
     async def update_book(self, form_data: dict):
@@ -145,4 +145,4 @@ class AuthorDetailState(rx.State):
         except Exception as e:
             logging.exception(f"Failed to update book: {e}")
         async with self:
-            return AuthorDetailState.get_author_details
+            yield AuthorDetailState.get_author_details
