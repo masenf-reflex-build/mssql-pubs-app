@@ -32,7 +32,7 @@ class AuthorDetailState(rx.State):
 
     @rx.var
     def author_id_from_route(self) -> str:
-        return self.router.page.params.get("au_id", "")
+        return self.router.url.query_parameters.get("au_id", "")
 
     @rx.event(background=True)
     async def get_author_details(self):
