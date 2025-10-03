@@ -88,10 +88,7 @@ def author_detail_page() -> rx.Component:
                                             class_name="text-lg font-semibold",
                                         ),
                                         rx.el.p(f"Type: {book['type']}"),
-                                        rx.el.p(
-                                            "Price: $"
-                                            + book["price"].to_string().split(".")[0]
-                                        ),
+                                        rx.el.p(f"Price: ${book['price']:.2f}"),
                                         rx.el.p(f"YTD Sales: {book['ytd_sales']}"),
                                         edit_book_form(book),
                                         class_name="p-4 border rounded-lg mt-4",

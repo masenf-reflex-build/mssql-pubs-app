@@ -41,17 +41,12 @@ class AuthorDetailState(rx.State):
             self.author = None
             self.books = []
         try:
-            author_id = await self.get_value(self.author_id_from_route)
-            if not author_id:
-                async with self:
-                    self.is_loading = False
-                return
             async with rx.asession() as session:
                 author_res = await session.execute(
                     text(
                         "SELECT au_id, au_fname + ' ' + au_lname, phone, address, city, state, zip, contract FROM authors WHERE au_id = :au_id"
                     ),
-                    {"au_id": author_id},
+                    {"au_id": self.author_id_from_route},
                 )
                 author_row = author_res.first()
                 if not author_row:
@@ -65,7 +60,7 @@ class AuthorDetailState(rx.State):
                         JOIN titleauthor ta ON t.title_id = ta.title_id
                         WHERE ta.au_id = :au_id
                     """),
-                    {"au_id": author_id},
+                    {"au_id": self.author_id_from_route},
                 )
                 books_rows = books_res.all()
             async with self:
@@ -98,9 +93,6 @@ class AuthorDetailState(rx.State):
     @rx.event(background=True)
     async def add_book(self, form_data: dict):
         try:
-            author_id = await self.get_value(self.author_id_from_route)
-            if not author_id:
-                return
             title_id = f"BU{random.randint(1000, 9999)}"
             async with rx.asession() as session:
                 async with session.begin():
@@ -119,12 +111,12 @@ class AuthorDetailState(rx.State):
                         text(
                             "INSERT INTO titleauthor (au_id, title_id) VALUES (:au_id, :title_id)"
                         ),
-                        {"au_id": author_id, "title_id": title_id},
+                        {"au_id": self.author_id_from_route, "title_id": title_id},
                     )
         except Exception as e:
             logging.exception(f"Failed to add book: {e}")
         async with self:
-            yield AuthorDetailState.get_author_details
+            return AuthorDetailState.get_author_details
 
     @rx.event(background=True)
     async def update_book(self, form_data: dict):
@@ -145,4 +137,4 @@ class AuthorDetailState(rx.State):
         except Exception as e:
             logging.exception(f"Failed to update book: {e}")
         async with self:
-            yield AuthorDetailState.get_author_details
+            return AuthorDetailState.get_author_details
