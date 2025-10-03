@@ -1,0 +1,6 @@
+
+reflex==0.8.13a1
+aioodbc>=0.5.0
+pyodbc>=5.2.0
+reflex-azure-auth
+reflex-enterprise
